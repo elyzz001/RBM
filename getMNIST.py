@@ -101,7 +101,7 @@ gzip_extract(test_img_gz,testIm_file)
 gzip_extract(test_label_gz,testLabel_file)
 print "...Done!"
 
-print "Extracting training data into numpy arrays...",
+print "Extracting test data into numpy arrays...",
 testIm,testLabel=unpack_mnist(testIm_file,testLabel_file)
 print "Done!"
 
