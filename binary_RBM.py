@@ -16,16 +16,27 @@ class binary_RBM(object):
 
 		N=x.shape(0)
 		for t in range(0,self.epoch):
-			numBatches=N/self.miniBatch
 
+			BatchList=self.partition_batches(N)
 			for batch in BatchList:
-				data=x[batch,:]
-
+				v=x[batch,:]
 				#Positive phase
-				
+
 
 
     def partition_batches(self,N):
+		numBatches=np.ceil(N/self.miniBatch)
+		BatchList=[]
+
+		sortingArr=np.random.permutation(N)
+		for i in range(0,numBatches,self.miniBatch):
+
+			if
+				batch=sortingArr[i:self.miniBatch*i]
+			BatchList.append(batch)
+
+
+
 
     def sigmoid(z):
 		return 1/(1+np.exp(-z))

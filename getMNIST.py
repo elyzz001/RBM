@@ -7,6 +7,8 @@ import os
 
 
 """
+	Downloads MNIST data set and saves the data set as pickled numpy arrays
+	
 	Script adapted from: http://abel.ee.ucla.edu/cvxopt/_downloads/mnist.py
 	and python documentation
 """
@@ -40,7 +42,7 @@ def unpack_mnist(filenameIm,filenameLabels):
 	for i in xrange(N):
 		images[:, :,i] = np.array(img[ i*rows*cols : (i+1)*rows*cols]).reshape(rows,cols)
 		labels[i] = lbl[i]
-	
+
 	return images,labels
 
 
