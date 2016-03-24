@@ -16,7 +16,7 @@ class binary_RBM(object):
         self.lr=lr
         self.mu=mu
     
-    @jit    
+   # @jit    
     def fit(self,x):
 
         N=x.shape[0]
@@ -29,6 +29,8 @@ class binary_RBM(object):
         v_h=np.zeros(self.hbias.shape)
         v_v=np.zeros(self.vbias.shape)        
         
+        cost=self.get_pseudo_likelihood(x)
+        print "Epoch %d Pseudo-likelihood cost:%f" % (0,cost)
         
         for t in range(0,self.epoches):
 
@@ -64,7 +66,8 @@ class binary_RBM(object):
                 
                 
             self.lr/=(t+2)
-            print "Epoch %d" % (t+1)
+            cost=self.get_pseudo_likelihood(x)
+            print "Epoch %d Pseudo-likelihood cost:%f" % (t+1,cost)
         return None
 
 
@@ -81,23 +84,29 @@ class binary_RBM(object):
             batch_list.append(idx)
 
         return batch_list,num_batches
+    
     @jit
     def _sigmoid(self,z):
         return 1/(1+np.exp(-z))
 
-    @jit
+
     def get_pseudo_likelihood(self,x):
         
         v=x.copy()        
         idx = (np.arange(v.shape[0]),
                np.random.randint(0, v.shape[1], v.shape[0]))
         v[idx]=1-v[idx]
-        
-        return None
-        
-    @jit 
-    free_energy(self,x)
+    
 
+        N=self.vbias.shape[0]
+        PL=N*np.log(self._sigmoid(self.free_energy(v)-self.free_energy(x)))
+        
+        return PL.mean()
+        
+    
+    def free_energy(self,x):
+        F=-np.dot(x,self.vbias)-np.sum(np.logaddexp(0,np.dot(x,self.W)+self.hbias),axis=1)
+        return F
 if __name__=="__main__":
     rbm=binary_RBM(10,batchSize=256,alpha=1e-5,epoches=100)
     x=np.random.rand(10000,10)

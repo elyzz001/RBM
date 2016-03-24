@@ -76,6 +76,7 @@ print "Extracting ubyte files from gz files..."
 print "-"+train_img_gz
 print "-"+train_label_gz
 gzip_extract(train_img_gz,trainIm_file)
+gzip_extract(train_label_gz,trainLabel_file)
 print "...Done!"
 
 print "Extracting training data into numpy arrays...",
