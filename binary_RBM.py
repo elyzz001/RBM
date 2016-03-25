@@ -41,12 +41,11 @@ class binary_RBM(object):
                 if t==0 and i==0:
                     h=p_h>np.random.rand(p_h.shape[0],p_h.shape[1])
                 
-                for k in range(0,15):
-                    p_v=self._sigmoid(np.dot(h,self.W.T)+self.vbias)
-                    v=p_v>np.random.rand(p_v.shape[0],p_v.shape[1])
-        
-                    q_h=self._sigmoid(np.dot(v,self.W)+self.hbias)
-                    h=q_h>np.random.rand(q_h.shape[0],q_h.shape[1])
+            
+                p_v=self._sigmoid(np.dot(h,self.W.T)+self.vbias)
+                v=p_v>np.random.rand(p_v.shape[0],p_v.shape[1])
+                q_h=self._sigmoid(np.dot(v,self.W)+self.hbias)
+                h=q_h>np.random.rand(q_h.shape[0],q_h.shape[1])
                 
         
                 g_W=np.dot(data.T,p_h)-np.dot(v.T,q_h)
@@ -55,9 +54,9 @@ class binary_RBM(object):
                 g_h=p_h.mean(axis=0)-q_h.mean(axis=0)
         
         
-                v_W=self.mu*v_W+self.lr*(g_W-self.alpha*self.W)
-                v_h=self.mu*v_h+self.lr*g_h
-                v_v=self.mu*v_v+self.lr*g_v
+                v_W=self.mu*v_W*(t/(t+1.0))+self.lr*(g_W-self.alpha*self.W)
+                v_h=self.mu*v_h*(t/(t+1.0))+self.lr*g_h
+                v_v=self.mu*v_v*(t/(t+1.0))+self.lr*g_v
         
                 self.W+=v_W
                 self.hbias+=v_h
@@ -97,7 +96,7 @@ class binary_RBM(object):
     
     
         N=self.vbias.shape[0]
-        PL=N*np.log(self._sigmoid(self.free_energy(v)-self.free_energy(x)))
+        PL=N*np.log(self._sigmoid(self.free_energy(x)-self.free_energy(v)))
     
         return PL.mean()
 
@@ -105,14 +104,31 @@ class binary_RBM(object):
     def free_energy(self,x):
         F=-np.dot(x,self.vbias)-np.sum(np.logaddexp(0,np.dot(x,self.W)+self.hbias),axis=1)
         return F
+    
+    @jit
+    def gibbs_sample(self,iters):
+        v=np.random.rand(self.n_visible)
+        
+        for i in range(0,iters):
+                p_h=self._sigmoid(np.dot(v,self.W)+self.hbias)
+                h=p_h>np.random.rand(p_h.shape[0])
+                p_v=self._sigmoid(np.dot(h,self.W.T)+self.vbias)
+                v=p_v>np.random.rand(p_v.shape[0])
+        return v
 if __name__=="__main__":
     import matplotlib.pyplot as plt
     
     x=np.load('trainIm.pkl')/255.0
-    #x=x.reshape((60000,784))
     x=x.reshape((784,60000)).T
- 
     
-    rbm=binary_RBM(n_visible=784,alpha=1e-5,lr=.01,epoches=10)
+    rbm=binary_RBM(n_visible=784,n_hidden=256,alpha=0,lr=.1,batchSize=256,epoches=10)
     rbm.fit(x)
     
+    v=rbm.gibbs_sample(100000)
+    plt.imshow(v.reshape((28,28)),cmap='gray')
+    plt.show()
+    
+#    from sklearn.neural_network import BernoulliRBM
+#    
+#    rbm2=BernoulliRBM(n_components=256,verbose=True)
+#    rbm2.fit(x)
