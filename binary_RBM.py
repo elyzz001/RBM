@@ -10,10 +10,15 @@ class binary_RBM(object):
         self.n_visible=n_visible
         self.batchSize=batchSize
         self.alpha=alpha
-        self.W=np.random.randn(n_visible,n_hidden)
+        
+        self.W=np.random.rand(n_visible,n_hidden)#np.random.randn(n_visible,n_hidden)
+        self.W*=8*np.sqrt(6./(n_hidden + n_visible))      
+        self.W-=4*np.sqrt(6/(n_hidden + n_visible))
+        
         self.hbias=np.zeros(n_hidden)
         self.vbias=np.zeros(n_visible)
         self.epoches=epoches
+        
         self.lr=lr
         self.mu=mu
 
@@ -31,6 +36,7 @@ class binary_RBM(object):
             N=x.shape[0]
             batches,num_batches=self._batchLists(N)
             num_batches=int(num_batches)
+            
             for i in range(0,num_batches):
     
                 idx=batches[i]
@@ -115,16 +121,17 @@ class binary_RBM(object):
                 p_v=self._sigmoid(np.dot(h,self.W.T)+self.vbias)
                 v=p_v>np.random.rand(p_v.shape[0])
         return v
+        
 if __name__=="__main__":
     import matplotlib.pyplot as plt
     
     x=np.load('trainIm.pkl')/255.0
     x=x.reshape((784,60000)).T
     
-    rbm=binary_RBM(n_visible=784,n_hidden=256,alpha=0,lr=.1,batchSize=256,epoches=10)
+    rbm=binary_RBM(n_visible=784,n_hidden=256,alpha=1e-6,lr=.1,batchSize=256,epoches=20)
     rbm.fit(x)
     
-    v=rbm.gibbs_sample(1000)
+    v=rbm.gibbs_sample(5000)
     plt.imshow(v.reshape((28,28)),cmap='gray')
     plt.show()
     
