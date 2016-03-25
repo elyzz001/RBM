@@ -96,7 +96,7 @@ class binary_RBM(object):
     
     
         N=self.vbias.shape[0]
-        PL=N*np.log(self._sigmoid(self.free_energy(x)-self.free_energy(v)))
+        PL=N*np.log(self._sigmoid(self.free_energy(v)-self.free_energy(x)))
     
         return PL.mean()
 
@@ -124,11 +124,7 @@ if __name__=="__main__":
     rbm=binary_RBM(n_visible=784,n_hidden=256,alpha=0,lr=.1,batchSize=256,epoches=10)
     rbm.fit(x)
     
-    v=rbm.gibbs_sample(100000)
+    v=rbm.gibbs_sample(1000)
     plt.imshow(v.reshape((28,28)),cmap='gray')
     plt.show()
     
-#    from sklearn.neural_network import BernoulliRBM
-#    
-#    rbm2=BernoulliRBM(n_components=256,verbose=True)
-#    rbm2.fit(x)
