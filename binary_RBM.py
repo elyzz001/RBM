@@ -13,9 +13,9 @@ class binary_RBM(object):
         self.k=k
         self.alpha=alpha
         
-        self.W=np.random.rand(n_visible,n_hidden)#np.random.randn(n_visible,n_hidden)
+        self.W=np.random.rand(n_visible,n_hidden)
         self.W*=8*np.sqrt(6./(n_hidden + n_visible))      
-        self.W-=4*np.sqrt(6/(n_hidden + n_visible))
+        self.W-=4*np.sqrt(6./(n_hidden + n_visible))
         
         self.hbias=np.zeros(n_hidden)
         self.vbias=np.zeros(n_visible)
@@ -122,7 +122,7 @@ class binary_RBM(object):
                 h=p_h>np.random.rand(p_h.shape[0])
                 p_v=self._sigmoid(np.dot(h,self.W.T)+self.vbias)
                 v=p_v>np.random.rand(p_v.shape[0])
-        return v
+        return v,p_v
         
 if __name__=="__main__":
     import matplotlib.pyplot as plt
@@ -130,10 +130,10 @@ if __name__=="__main__":
     x=np.load('trainIm.pkl')/255.0
     x=x.reshape((784,60000)).T
     
-    rbm=binary_RBM(n_visible=784,n_hidden=256,alpha=0,lr=.1,batchSize=20,epochs=4)
+    rbm=binary_RBM(n_visible=784,n_hidden=25,alpha=0,lr=.1,batchSize=20,epochs=4)
     rbm.fit(x)
-    v=rbm.gibbs_sample(10000)
-    plt.imshow(v.reshape((28,28)),cmap='gray')
+    v,p_v=rbm.gibbs_sample(10000)
+    plt.imshow(p_v.reshape((28,28)),cmap='gray')
     plt.show()
     
     
