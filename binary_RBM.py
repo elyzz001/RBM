@@ -39,12 +39,13 @@ class binary_RBM(object):
             batches,num_batches=self._batchLists(N)
             num_batches=int(num_batches)
             
+            self.mu=(1-(3.0/(5.0+t)))
             for i in range(0,num_batches):
     
                 idx=batches[i]
                 data=np.squeeze(x[idx,:])
                 B=data.shape[0]
-        
+                
                 p_h=self._sigmoid(np.dot(data,self.W)+self.hbias)
                 if t==0 and i==0:
                     h=p_h>np.random.rand(p_h.shape[0],p_h.shape[1])
@@ -61,7 +62,7 @@ class binary_RBM(object):
                 g_v=data.mean(axis=0)-v.mean(axis=0)
                 g_h=p_h.mean(axis=0)-q_h.mean(axis=0)
         
-        
+                
                 v_W=self.mu*v_W*(t/(t+1.0))+self.lr*(g_W-self.alpha*self.W)
                 v_h=self.mu*v_h*(t/(t+1.0))+self.lr*g_h
                 v_v=self.mu*v_v*(t/(t+1.0))+self.lr*g_v
@@ -70,10 +71,13 @@ class binary_RBM(object):
                 self.hbias+=v_h
                 self.vbias+=v_v
     
-    
-            self.lr/=(t+2)
+            
+            self.lr/=np.sqrt(t+2)
             cost=self.get_pseudo_likelihood(x)
             print("Epoch %d Pseudo-likelihood cost:%f" % (t+1,cost))
+            
+            
+        
         return None
 
 
@@ -130,10 +134,20 @@ if __name__=="__main__":
     x=np.load('trainIm.pkl')/255.0
     x=x.reshape((784,60000)).T
     
-    rbm=binary_RBM(n_visible=784,n_hidden=25,alpha=0,lr=.1,batchSize=20,epochs=4)
+    rbm=binary_RBM(n_visible=784,n_hidden=50,alpha=1e-6,lr=.1,batchSize=20,epochs=10,mu=1)
     rbm.fit(x)
-    v,p_v=rbm.gibbs_sample(10000)
+    
+    
+    v,p_v=rbm.gibbs_sample(100000)
+   
+    plt.figure()
     plt.imshow(p_v.reshape((28,28)),cmap='gray')
     plt.show()
     
+    W=rbm.W
+    
+    plt.figure()
+    for i in xrange(25):
+        plt.subplot(5,5,i+1)
+        plt.imshow(W[:,i].reshape((28,28)),cmap='gray')
     
