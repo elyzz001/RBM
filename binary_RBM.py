@@ -1,8 +1,9 @@
 from __future__ import print_function
 import numpy as np
 from numba import jit
+import sys, os
 
-
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 class binary_RBM(object):
 
     def __init__(self,n_visible=None,n_hidden=256,batchSize=256,lr=0.1,alpha=0,
